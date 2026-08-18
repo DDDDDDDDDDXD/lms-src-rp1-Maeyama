@@ -72,6 +72,26 @@ public class StudentAttendanceService {
 
 		return attendanceManagementDtoList;
 	}
+	
+	/**
+	 * 過去日の勤怠未入力チェック
+	 * 
+	 * @return 過去日の勤怠に未入力がある場合true
+	 */
+	//Task.25追加
+	public Boolean notEnterCheck() {
+
+		// 本日の日付
+		Date trainingDate = attendanceUtil.getTrainingDate();
+
+		// 過去日の未入力件数取得
+		Integer notEnterCount = tStudentAttendanceMapper.notEnterCount(
+				loginUserDto.getLmsUserId(),
+				trainingDate,
+				Constants.DB_FLG_FALSE);
+		
+		return notEnterCount > 0;
+	}
 
 	/**
 	 * 出退勤更新前のチェック
