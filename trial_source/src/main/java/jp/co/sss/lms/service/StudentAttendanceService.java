@@ -76,9 +76,9 @@ public class StudentAttendanceService {
 	/**
 	 * 過去日の勤怠未入力チェック
 	 * 
-	 * @return 過去日の勤怠に未入力がある場合true
+	 * @author Maeyama - Task.25
+	 * @return 過去日の勤怠に未入力がある場合true,無しfalse
 	 */
-	//Task.25追加
 	public Boolean notEnterCheck() {
 
 		// 本日の日付
@@ -87,8 +87,8 @@ public class StudentAttendanceService {
 		// 過去日の未入力件数取得
 		Integer notEnterCount = tStudentAttendanceMapper.notEnterCount(
 				loginUserDto.getLmsUserId(),
-				trainingDate,
-				Constants.DB_FLG_FALSE);
+				Constants.DB_FLG_FALSE,
+				trainingDate);
 		
 		return notEnterCount > 0;
 	}
@@ -239,6 +239,11 @@ public class StudentAttendanceService {
 		attendanceForm.setUserName(loginUserDto.getUserName());
 		attendanceForm.setLeaveFlg(loginUserDto.getLeaveFlg());
 		attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
+		
+		//Task.26追記---------------------------------------------
+		attendanceForm.setHours(attendanceUtil.setHours());
+		attendanceForm.setMinutes(attendanceUtil.setMinutes());
+		//--------------------------------------------------------
 
 		// 途中退校している場合のみ設定
 		if (loginUserDto.getLeaveDate() != null) {
@@ -255,9 +260,33 @@ public class StudentAttendanceService {
 					.setStudentAttendanceId(attendanceManagementDto.getStudentAttendanceId());
 			dailyAttendanceForm
 					.setTrainingDate(dateUtil.toString(attendanceManagementDto.getTrainingDate()));
+			
+			//出勤
 			dailyAttendanceForm
 					.setTrainingStartTime(attendanceManagementDto.getTrainingStartTime());
-			dailyAttendanceForm.setTrainingEndTime(attendanceManagementDto.getTrainingEndTime());
+			
+			//Task.26追記
+			String trainingStartTime = attendanceManagementDto.getTrainingStartTime();
+			if (trainingStartTime != null && !trainingStartTime.isEmpty()) {
+				dailyAttendanceForm.setTrainingStartTimeHour(
+						Integer.parseInt(trainingStartTime.substring(0, 2)));
+				dailyAttendanceForm.setTrainingStartTimeMinute(
+						Integer.parseInt(trainingStartTime.substring(3, 5)));
+			}
+			
+			//退勤
+			dailyAttendanceForm
+					.setTrainingEndTime(attendanceManagementDto.getTrainingEndTime());
+			
+			//Task.26追記
+			String trainingEndTime = attendanceManagementDto.getTrainingEndTime();
+			if (trainingEndTime != null && !trainingEndTime.isEmpty()) {
+				dailyAttendanceForm.setTrainingEndTimeHour(
+						Integer.parseInt(trainingEndTime.substring(0, 2)));
+				dailyAttendanceForm.setTrainingEndTimeMinute(
+						Integer.parseInt(trainingEndTime.substring(3, 5)));
+			}
+			
 			if (attendanceManagementDto.getBlankTime() != null) {
 				dailyAttendanceForm.setBlankTime(attendanceManagementDto.getBlankTime());
 				dailyAttendanceForm.setBlankTimeValue(String.valueOf(
@@ -286,6 +315,10 @@ public class StudentAttendanceService {
 	 */
 	public String update(AttendanceForm attendanceForm) throws ParseException {
 
+		//Task.26 追記-------------------
+		formatConversion(attendanceForm);
+		//-------------------------------
+		
 		Integer lmsUserId = loginUserUtil.isStudent() ? loginUserDto.getLmsUserId()
 				: attendanceForm.getLmsUserId();
 
@@ -352,6 +385,35 @@ public class StudentAttendanceService {
 		}
 		// 完了メッセージ
 		return messageUtil.getMessage(Constants.PROP_KEY_ATTENDANCE_UPDATE_NOTICE);
+	}
+	
+	//Task.26 追記 
+	public AttendanceForm formatConversion(AttendanceForm attendanceForm) {
+
+		for (DailyAttendanceForm dailyAttendanceForm : attendanceForm.getAttendanceList()) {
+
+			//出勤時間
+			if (dailyAttendanceForm.getTrainingStartTimeHour() != null
+					&& dailyAttendanceForm.getTrainingStartTimeMinute() != null) {
+
+				dailyAttendanceForm.setTrainingStartTime(
+						String.format("%02d:%02d",
+								dailyAttendanceForm.getTrainingStartTimeHour(),
+								dailyAttendanceForm.getTrainingStartTimeMinute()));
+			}
+
+			//退勤時間
+			if (dailyAttendanceForm.getTrainingEndTimeHour() != null
+					&& dailyAttendanceForm.getTrainingEndTimeMinute() != null) {
+
+				dailyAttendanceForm.setTrainingEndTime(
+						String.format("%02d:%02d",
+								dailyAttendanceForm.getTrainingEndTimeHour(),
+								dailyAttendanceForm.getTrainingEndTimeMinute()));
+			}
+		}
+
+		return attendanceForm;
 	}
 
 }

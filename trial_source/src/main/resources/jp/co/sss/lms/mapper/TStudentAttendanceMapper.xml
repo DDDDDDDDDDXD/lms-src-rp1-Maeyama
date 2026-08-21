@@ -105,19 +105,21 @@
 	</update>
 
 	<!-- Task.25追記 -->
-	<select id="notEnterCount" resultType="java.lang.Integer">
-		SELECT COUNT(*)
-		FROM t_student_attendance
-		WHERE lms_user_id = #{lmsUserId}
+<select id="notEnterCount" resultType="java.lang.Integer">
+
+	SELECT COUNT(*)
+	FROM t_student_attendance
+	WHERE lms_user_id = #{lmsUserId}
 		AND delete_flg = #{deleteFlg}
-		AND
-		training_date &lt; #{trainingDate}
+		AND training_date &lt; #{trainingDate}
+		AND training_status != 1
 		AND (
-		training_start_time IS NULL
-		OR training_start_time = ''
-		OR training_end_time IS NULL
-		OR training_end_time = ''
+			training_start_time IS NULL
+			OR training_start_time = ''
+			OR training_end_time IS NULL
+			OR training_end_time = ''
 		)
-	</select>
+
+</select>
 
 </mapper>

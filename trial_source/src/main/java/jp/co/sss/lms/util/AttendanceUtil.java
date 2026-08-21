@@ -146,5 +146,65 @@ public class AttendanceUtil {
 		}
 		return false;
 	}
+	
+	/**
+	 * Task.26追記 時間選択肢取得
+	 *
+	 * @return 選択した時間
+	 */
+	public LinkedHashMap<Integer, String> setHours() {
+		LinkedHashMap<Integer, String> map = new LinkedHashMap<>();
+		map.put(null, "");
+
+		for (int i = 0; i < 24; i++) {
+			map.put(i, String.format("%02d", i));
+		}
+
+		return map;
+	}
+	
+	/**
+	 * Task.26追記 分数選択肢取得
+	 *
+	 * @return 選択した分数
+	 */
+	public LinkedHashMap<Integer, String> setMinutes() {
+		LinkedHashMap<Integer, String> map = new LinkedHashMap<>();
+		map.put(null, "");
+
+		for (int i = 0; i < 60; i++) {
+			map.put(i, String.format("%02d", i));
+		}
+
+		return map;
+	}
+	
+	/**
+	 * Task.26追記 現在時間を取得
+	 *
+	 * @param timeString hh:mm形式の時刻
+	 * @return 時間
+	 */
+	public Integer getHour(String timeString) {
+		if (timeString == null || timeString.isEmpty()) {
+			return null;
+		}
+
+		return Integer.parseInt(timeString.substring(0, 2));
+	}
+	
+	/**
+	 * Task.26追記 現在分数を取得
+	 *
+	 * @param timeString hh:mm形式の時刻
+	 * @return 分
+	 */
+	public Integer getMinute(String timeString) {
+		if (timeString == null || timeString.isEmpty()) {
+			return null;
+		}
+
+		return Integer.parseInt(timeString.substring(3, 5));
+	}
 
 }
